@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panorama Viewer</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <div class="main-container">
+      <div class="tabs">
+        <!-- Buttons for panorama selection with image previews and names -->
+        <button class="tab" onclick="loadPanorama(0)">
+          <img src="images/image1.jpeg" alt="Panorama 1" />
+          <span class="tooltip">Place 1</span>
+        </button>
+        <button class="tab" onclick="loadPanorama(1)">
+          <img src="images/image4.jpeg" alt="Panorama 2" />
+          <span class="tooltip">Place 2</span>
+        </button>
+        <button class="tab" onclick="loadPanorama(2)">
+          <img src="images/image5.jpg" alt="Panorama 2" />
+          <span class="tooltip">Place 2</span>
+        </button>
+
+        <button class="tab" onclick="loadPanorama(3)">
+          <img src="images/image3.jpeg" alt="Panorama 2" />
+          <span class="tooltip">Place 2</span>
+        </button> 
+
+      </div>
+
+      <div class="image-container"></div>
+    </div>
+
+    <div class="popup" id="modal">
+      <div class="popup-inner">
+        <div class="popup__photo">
+          <img id="imageSource" src="" alt="Hotspot Image">
+        </div>
+        <div class="popup__text">
+          <h1 id="title">Title</h1>
+          <p id="description">Description about the hotspot goes here.</p>
+        </div>
+        <a href="#" class="popup__close" id="close-btn">&times;</a>
+      </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
+    <script src="data.js" type="module"></script>
+    <script src="js/panolens.min.js"></script>
+    <script src="main.js" type="module"></script>
+  </body>
+</html>
