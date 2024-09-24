@@ -30,6 +30,7 @@ function initializeViewer() {
     controlBar: false,
     viewIndicator: true,
     reverseDragging: false,
+    cameraFov: 90,
   });
 
   loadPanorama(0); // Load the first panorama by defaults
