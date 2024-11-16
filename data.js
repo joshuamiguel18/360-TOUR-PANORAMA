@@ -1,10 +1,10 @@
 export const panoramas = [
     {
-      imagePath: 'images/image1.jpeg',
+      imagePath: 'images/image6.jpg',
       hotspots: [
         {
           position: { x: 5000, y: -1000, z: -5000 },
-          size: 300,
+          size: 600,
           description: "      Lorem ipsum dolor sit amet consectetur adipisicing elit. Beatae dolor nam voluptatem sint dignissimos laborum natus tenetur vel eum rerum accusantium sed libero similique, adipisci doloremque asperiores? Eveniet a, dolore rerum cupiditate explicabo totam dicta? Debitis totam vel molestiae iusto?",
           title: "Kalinga",
           hotspotOnly: true,
@@ -13,7 +13,7 @@ export const panoramas = [
         },
         {
           position: { x: -3000, y: 1000, z: 4000 },
-          size: 300,
+          size: 600,
           description: "lorem ipsum 2",
           hotspotOnly: true,
           title: "The Kalinga 2",
@@ -21,7 +21,7 @@ export const panoramas = [
         },
         {
             position: { x: -2000, y: 1000, z: 4000 },
-            size: 300,
+            size: 600,
 
             hotspotOnly: false,
             index: 1,

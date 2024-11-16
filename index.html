@@ -2,7 +2,8 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
     <title>Panorama Viewer</title>
     <link rel="stylesheet" href="style.css" />
   </head>
@@ -17,12 +18,12 @@
     </div>
     
     <div class="main-container">
-      <div class="tabs">
+      <div class="tabs" id="tabs">
 
 
         
           <!-- Buttons for panorama selection with image previews and names -->
-          <button class="tab" onclick="loadPanorama(0)">
+          <!-- <button class="tab" onclick="loadPanorama(0)">
             <img src="images/image1.jpeg" alt="Panorama 1" />
             <span class="tooltip">Place 1</span>
           </button>
@@ -38,11 +39,13 @@
           <button class="tab" onclick="loadPanorama(3)">
             <img src="images/image3.jpeg" alt="Panorama 2" />
             <span class="tooltip">Place 2</span>
-          </button> 
+          </button>  -->
     
       </div>
 
-      <div class="image-container"></div>
+      <div class="image-container">
+        
+      </div>
     </div>
 
     <div class="popup" id="modal">
@@ -57,7 +60,7 @@
         <a href="#" class="popup__close" id="close-btn">&times;</a>
       </div>
     </div>
-    
+   
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
     <script src="data.js" type="module"></script>
     <script src="js/panolens.min.js"></script>
