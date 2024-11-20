@@ -1,7 +1,7 @@
-  import { panoramas } from './data.js';
-
+  import { panoramas, customImages } from './data.js';
   let viewer;
   let panoramaImage;
+
 
   const imageContainer = document.querySelector(".image-container");
 
@@ -28,19 +28,37 @@
       container: imageContainer,
       autoRotate: true,
       autoRotateSpeed: 0.6,
-      controlBar: false,
-      viewIndicator: true,
-      reverseDragging: false,
+      controlBar: true,
+      controlButtons: [ 'fullscreen', 'video' ],
       cameraFov: 60,
-      momentum: false,
+      momentum: true,
+      
+      rotateSpeed: -10,
+      dampingFactor: .6,
       autoHideInfosport: false,
+ 
     });
     
       loadButtons();
       loadPanorama(0); // Load the first panorama by defaults
+
+
       const maxFov = 90; // Maximum zoom-out
-      const minFov = 30;  // Minimum zoom-in
+      const minFov = 20;  // Minimum zoom-in
       
+       // Default is 1; higher means faster response
+
+      // viewer.OrbitControls.enableDamping = true; // Enable smooth damping
+      // viewer.OrbitControls.dampingFactor = 0.1; // Adjust this value for smoother drag
+          // Adjust rotation sensitivity (lower is slower)
+      // viewer.reverseDragging = false; // Drag moves the scene with the cursor
+      // viewer.OrbitControls.rotateSpeed = 2;
+      // viewer.renderer.outputEncoding = THREE.sRGBEncoding; // Optimize rendering colors
+      // viewer.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Better tone mapping
+      // viewer.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit for high DPI
+      // viewer.renderer.setSize(window.innerWidth, window.innerHeight); // Match viewport size
+
+
       function smoothZoom(targetFov, duration = 0.4) {  // Adjusted for momentum effect
         // Clamp the target FOV within limits
         targetFov = Math.max(minFov, Math.min(maxFov, targetFov));
@@ -52,6 +70,9 @@
             onUpdate: () => {
                 viewer.camera.updateProjectionMatrix(); // Update camera matrix
                 updateInfospotSize();
+                viewer.OrbitControls.rotateLeft(velocity.x);
+                viewer.OrbitControls.rotateUp(velocity.y);
+                viewer.OrbitControls.update(); // Update the controls
             },
             ease: "elastic.out(.5, .7)",// Elastic easing for momentum effect
             overwrite: true
@@ -111,6 +132,20 @@
   }
 
 
+  viewer.OrbitControls.addEventListener('start', () => {
+    imageContainer.classList.add('dragging');
+    imageContainer.style.cursor = 'grabbing'; // Ensure cursor updates to grabbing
+  });
+
+  viewer.OrbitControls.addEventListener('end', () => {
+      imageContainer.classList.remove('dragging');
+      imageContainer.style.cursor = 'grab'; // Revert to grab when dragging ends
+  });
+
+
+  
+
+
 
 
 }
@@ -131,94 +166,126 @@
     }, 300); // Timeout to match the fade-out transition
   }
 
+  const panoramaList = [];
+  function loadPanormas() {
+      panoramas.forEach((panoramaItem) => {
+        const panoramaItemImage = new PANOLENS.ImagePanorama(panoramaItem.imagePath);
+        panoramaList.push(panoramaItemImage);
+        viewer.add(panoramaItemImage);
+      })
+  }
+
 
   // Load panorama with hotspots that can switch between panoramas
   function loadPanorama(index) {
     const panoramaData = panoramas[index];
 
     // Show preloader
-    showPreloader();
+    //showPreloader();
 
     // Fade out the current panorama
     imageContainer.classList.add('hidden');
 
     setTimeout(() => {
       // Remove the existing panorama if it exists
-      if (panoramaImage) {
-        panoramaImage.dispose();
-        viewer.remove(panoramaImage);
-        
-      }
 
+      const panoramaImage = panoramaList[index];
       // Create and add the new panorama
-      panoramaImage = new PANOLENS.ImagePanorama(panoramaData.imagePath);
-      
-      viewer.add(panoramaImage);
+      //panoramaImage = new PANOLENS.ImagePanorama(panoramaData.imagePath);
+      console.log(panoramaList[index]);
+      // console.log("second ", panoramaData.imagePath);
+      viewer.setPanorama(panoramaImage);
 
 
-      viewer.OrbitControls.addEventListener('start', () => {
-        imageContainer.classList.add('dragging');
-      });
-      
-      viewer.OrbitControls.addEventListener('end', () => {
-        imageContainer.classList.remove('dragging');
-      });
+      const existingHotspots = panoramaImage.children.filter(child => child instanceof PANOLENS.Infospot);
+      existingHotspots.forEach(hotspot => panoramaImage.remove(hotspot));
+
 
       // After adding the new panorama, fade it in
       imageContainer.classList.remove('hidden');
 
 
-
+      
       // Add hotspots for the panorama
-      panoramaData.hotspots.forEach((hotspotData) => {
-        var hotspot;
 
-        if (!hotspotData.hotspotOnly) {
-          hotspot = new PANOLENS.Infospot(hotspotData.size, PANOLENS.DataImage.Arrow);
-          hotspot.position.set(hotspotData.position.x, hotspotData.position.y, hotspotData.position.z);
-          hotspot.addEventListener('click', () => {
-            // Show preloader before switching to another panorama
-            showPreloader();
-            loadPanorama(hotspotData.index);
-          });
-        } else {
-          hotspot = new PANOLENS.Infospot(hotspotData.size, PANOLENS.DataImage.Info);
-          hotspot.position.set(hotspotData.position.x, hotspotData.position.y, hotspotData.position.z);
-          hotspot.addEventListener('click', () => {
-            // Show the modal when a hotspot is clicked
-            modal.style.visibility = 'visible';
-            modal.style.opacity = '1';
+        panoramaData.hotspots.forEach((hotspotData) => {
+          var hotspot;
 
-            // Dynamically load content into modal
-            document.getElementById('title').innerText = hotspotData.title;
-            document.getElementById('description').innerText = hotspotData.description;
-            document.getElementById('imageSource').src = hotspotData.sourceImage;
+          if (!hotspotData.hotspotOnly) {
+            hotspot = new PANOLENS.Infospot(hotspotData.size, customImages.arrowUp);
+            hotspot.position.set(hotspotData.position.x, hotspotData.position.y, hotspotData.position.z);
+            hotspot.addEventListener('click', () => {
+              // Show preloader before switching to another panorama
+              viewer.tweenControlCenter(hotspot.position, 2000);
 
-            // Close modal logic
-            document.getElementById('close-btn').onclick = (e) => {
-              e.preventDefault();
-              modal.style.visibility = 'hidden';
-              modal.style.opacity = '0';
-            };
-            hotspot.element.addEventListener('mouseenter', () => {
-              imageContainer.style.cursor = 'pointer';
+              setTimeout(() => {
+                loadPanorama(hotspotData.index); // Transition to the next panorama
+              }, 500);
+              
+              
             });
+            console.log("Link created")
+          } else {
+            hotspot = new PANOLENS.Infospot(hotspotData.size, customImages.infoImage);
+            hotspot.position.set(hotspotData.position.x, hotspotData.position.y, hotspotData.position.z);
+            hotspot.addEventListener('click', () => {
+              // Show the modal when a hotspot is clicked\
+              viewer.tweenControlCenter(hotspot.position, 1000);
+              modal.style.visibility = 'visible';
+              modal.style.opacity = '1';
+
+              // Dynamically load content into modal
+              document.getElementById('title').innerText = hotspotData.title;
+              document.getElementById('description').innerText = hotspotData.description;
+              document.getElementById('imageSource').src = hotspotData.sourceImage;
+
+              // Close modal logic
+              document.getElementById('close-btn').onclick = (e) => {
+                e.preventDefault();
+                modal.style.visibility = 'hidden';
+                modal.style.opacity = '0';
+              };
+
+            });
+
+          console.log("Hotspot created")
+          }
+
+          // Add the hotspot to the panorama
+          panoramaImage.add(hotspot);
           
-            hotspot.element.addEventListener('mouseleave', () => {
-              imageContainer.style.cursor = imageContainer.classList.contains('dragging') ? 'grabbing' : 'grab';
-            });
-          });
-        }
+          setTimeout(() => {hidePreloader()}, 200);
+          
+        });
+      
 
-        // Add the hotspot to the panorama
-        panoramaImage.add(hotspot);
-        setTimeout(() => {hidePreloader()}, 200);
-        
-      });
-    }, 500); // 500ms delay for the fade effect
+      }, 500); // 500ms delay for the fade effect
         // Hide preloader
+        
     
   }
+
+
+  function zoomInAndTransition(targetIndex, targetFov, duration) {
+    const initialFov = viewer.getCameraFov();
+    const stepCount = 60; // Number of animation steps
+    const stepTime = duration / stepCount;
+    let currentStep = 0;
+
+    const interval = setInterval(() => {
+        currentStep++;
+        const newFov = initialFov + ((targetFov - initialFov) * (currentStep / stepCount));
+        viewer.setCameraFov(newFov);
+
+        if (currentStep >= stepCount) {
+            clearInterval(interval);
+
+            // Transition to the next panorama after zooming in
+            loadPanorama(targetIndex);
+          }
+      }, stepTime);
+    }
+
 
 
   function updateInfospotSize() {
@@ -300,7 +367,7 @@
 
   // Initialize the viewer and load the first panorama
   initializeViewer();
-
+  loadPanormas();
   window.loadPanorama = loadPanorama;
 
   window.addEventListener('load', function() {
