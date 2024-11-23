@@ -4,6 +4,10 @@
 
 
   const imageContainer = document.querySelector(".image-container");
+  
+  const maxFov = 90; // Maximum zoom-out
+  const minFov = 20;  // Minimum zoom-in
+
 
   var tabs = document.getElementById('tabs');
   function loadButtons() {
@@ -28,31 +32,31 @@
       container: imageContainer,
       autoRotate: true,
       autoRotateSpeed: 0.6,
-      controlBar: true,
-      controlButtons: [ 'fullscreen', 'video' ],
+      controlBar: false,
+
       cameraFov: 60,
-      momentum: true,
+      momentum: false,
       
-      rotateSpeed: -10,
-      dampingFactor: .6,
-      autoHideInfosport: false,
+      rotateSpeed: -5.0,
+      dampingFactor: .01,
+
+      autoHideInfospot: false,
  
     });
     
       loadButtons();
       loadPanorama(0); // Load the first panorama by defaults
 
-
-      const maxFov = 90; // Maximum zoom-out
-      const minFov = 20;  // Minimum zoom-in
       
+
+
        // Default is 1; higher means faster response
 
       // viewer.OrbitControls.enableDamping = true; // Enable smooth damping
       // viewer.OrbitControls.dampingFactor = 0.1; // Adjust this value for smoother drag
           // Adjust rotation sensitivity (lower is slower)
       // viewer.reverseDragging = false; // Drag moves the scene with the cursor
-      // viewer.OrbitControls.rotateSpeed = 2;
+      // viewer.OrbitControls.rotateSpeed = 1;
       // viewer.renderer.outputEncoding = THREE.sRGBEncoding; // Optimize rendering colors
       // viewer.renderer.toneMapping = THREE.ACESFilmicToneMapping; // Better tone mapping
       // viewer.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limit for high DPI
@@ -317,41 +321,82 @@
   }
   
   // Function to exit fullscreen
-  function closeFullscreen() {
-    if (document.exitFullscreen) {
-      document.exitFullscreen(); // For standard browsers
-    } else if (document.webkitExitFullscreen) { // For Safari
-      document.webkitExitFullscreen();
-    } else if (document.msExitFullscreen) { // For IE11
-      document.msExitFullscreen();
-    }
-  }
+  // function closeFullscreen() {
+  //   if (document.exitFullscreen) {
+  //     document.exitFullscreen(); // For standard browsers
+  //   } else if (document.webkitExitFullscreen) { // For Safari
+  //     document.webkitExitFullscreen();
+  //   } else if (document.msExitFullscreen) { // For IE11
+  //     document.msExitFullscreen();
+  //   }
+  // }
 
-  document.addEventListener('fullscreenchange', () => {
-    if (document.fullscreenElement) {
-      console.log("Entered fullscreen mode");
-    } else {
-      console.log("Exited fullscreen mode");
-    }
-  });
+  // document.addEventListener('fullscreenchange', () => {
+  //   if (document.fullscreenElement) {
+  //     console.log("Entered fullscreen mode");
+  //   } else {
+  //     console.log("Exited fullscreen mode");
+  //   }
+  // });
   
   // Add a button to toggle fullscreen
-  const fullscreenButton = document.createElement("button");
-  fullscreenButton.innerHTML = "Go Fullscreen";
-  fullscreenButton.style.position = "absolute";
-  fullscreenButton.style.top = "10px";
-  fullscreenButton.style.left = "10px";
-  fullscreenButton.style.zIndex = "1000"; // Ensure button is on top
-  fullscreenButton.addEventListener('click', () => {
+// Get control elements
+const fullscreenBtn = document.getElementById('fullscreenBtn');
+const zoomInBtn = document.getElementById('zoomInBtn');
+const zoomOutBtn = document.getElementById('zoomOutBtn');
+const toggleInfospotsBtn = document.getElementById('toggleInfospotsBtn');
+
+// Fullscreen toggle
+fullscreenBtn.addEventListener('click', () => {
     if (!document.fullscreenElement) {
-      openFullscreen(); // Enter fullscreen
+        document.documentElement.requestFullscreen();
     } else {
-      closeFullscreen(); // Exit fullscreen
+        document.exitFullscreen();
     }
-  });
-  
-  // Add the button to the body or any specific container
-  document.body.appendChild(fullscreenButton);
+});
+
+const ZOOM_STEP =15; // Smaller step for more control
+const ZOOM_DURATION = 300; // Faster zoom duration
+
+// Smooth zoom function using TWEEN.js
+function smoothZoom(targetFov, duration = ZOOM_DURATION) {
+    const camera = viewer.getCamera();
+    const initialFov = camera.fov;
+
+    new TWEEN.Tween({ fov: initialFov })
+        .to({ fov: targetFov }, duration)
+        .easing(TWEEN.Easing.Quadratic.Out)
+        .onUpdate((obj) => {
+            camera.fov = obj.fov;
+            camera.updateProjectionMatrix();
+        })
+        .start();
+}
+
+// Event listeners for zoom in and out
+zoomInBtn.addEventListener('click', () => {
+    const camera = viewer.getCamera();
+    const newFov = Math.max(minFov, camera.fov - ZOOM_STEP); // Prevent zooming in too much
+    smoothZoom(newFov);
+});
+
+zoomOutBtn.addEventListener('click', () => {
+    const camera = viewer.getCamera();
+    const newFov = Math.min(maxFov, camera.fov + ZOOM_STEP); // Prevent zooming out too much
+    smoothZoom(newFov);
+});
+
+// Toggle infospots
+let infospotsVisible = true;
+toggleInfospotsBtn.addEventListener('click', () => {
+    infospotsVisible = !infospotsVisible;
+    viewer.panorama.children.forEach((child) => {
+        if (child instanceof PANOLENS.Infospot) {
+            child.visible = infospotsVisible;
+        }
+    });
+});
+
 
 
 

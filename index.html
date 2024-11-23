@@ -6,6 +6,7 @@
 
     <title>Panorama Viewer</title>
     <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.1/css/all.min.css" integrity="sha512-5Hs3dF2AEPkpNAR7UiOHba+lRSJNeM2ECkwxUIxC1Q/FLycGTbNapWXB4tP889k5T5Ju8fs4b1P5z/iB4nMfSQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   </head>
   <body>
     <div id="preloader">
@@ -60,7 +61,14 @@
         <a href="#" class="popup__close" id="close-btn">&times;</a>
       </div>
     </div>
-   
+    
+    <div id="controls">
+      <button id="fullscreenBtn" class="control-btn"><i class="fa-solid fa-expand"></i></button>
+      <button id="zoomInBtn" class="control-btn"><i class="fa-solid fa-magnifying-glass-plus"></i></button>
+      <button id="zoomOutBtn" class="control-btn"><i class="fa-solid fa-magnifying-glass-minus"></i></button>
+      <button id="toggleInfospotsBtn" class="control-btn"><i class="fa-solid fa-circle-question"></i></button>
+    </div>
+  
     <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/105/three.min.js"></script>
     <script src="data.js" type="module"></script>
     <script src="js/panolens.min.js"></script>
